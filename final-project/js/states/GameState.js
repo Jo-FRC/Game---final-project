@@ -1,6 +1,6 @@
 var GameState = {
 
-    init: function() {
+    init: function(currentLevel) {
 
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.physics.arcade.gravity.y = 1000;
@@ -11,6 +11,11 @@ var GameState = {
 
         this.RUNNING_SPEED = 180;
         this.JUMPING_SPEED = 550;
+
+        //level data
+        this.numLevels = 3;
+        this.currentLevel = currentLevel ? currentLevel : 1;
+        console.log('current level: ' + this.currentLevel);
     },
 
 
@@ -134,8 +139,16 @@ var GameState = {
             this.player.customParams.mustJump = false;
         }, this);
 
+        this.actionButton.events.onInputDown.add(function(){
+            this.player.customParams.mustJump = true;
+        }, this);
+
+        this.actionButton.events.onInputOut.add(function(){
+            this.player.customParams.mustJump = false;
+        }, this);
+
         //left
-        this.leftArrow.events.onInputDown.add(function(){
+        this.leftArrow.events.onInputOver.add(function(){
             this.player.customParams.isMovingLeft = true;
         }, this);
 
