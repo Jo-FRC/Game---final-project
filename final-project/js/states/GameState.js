@@ -1,7 +1,6 @@
 var GameState = {
 
     init: function(currentLevel) {
-
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.physics.arcade.gravity.y = 1000;
 
@@ -14,7 +13,7 @@ var GameState = {
 
         //level data
         this.numLevels = 3;
-        this.currentLevel = currentLevel ? currentLevel : 1;
+        this.currentLevel = this.currentLevel || 1;
         console.log('current level: ' + this.currentLevel);
     },
 
@@ -22,6 +21,36 @@ var GameState = {
 
     //executed after everything is loaded
     create: function() {
+        var style = {font:'35px Arial', fill:'#fff'};
+        var style2 = {font:'18px Arial', fill:'#fff'};
+        var myText = 'LEVEL ' + GameState.currentLevel;
+        var testo = this.game.add.text(110, this.game.world.centerY + 240,  myText, style);
+
+        // var time = this.game.add.text(0, 10,  'Time: ', style2);
+        var score = this.game.add.text(140, 10,  'Score: ', style2);
+
+        var time = this.game.add.text(80, 10,  '11', style2);
+
+
+        timer = game.time.create();
+
+       // Create a delayed event 1m and 30s from now
+       timerEvent = timer.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 30, this.endTimer, this);
+
+       // Start the timer
+       timer.start();
+
+        // secondi.fixedToCamera = true;
+        timer.fixedToCamera = true;
+        score.fixedToCamera = true;
+
+        this.refreshStats();
+
+        game.time.events.add(2000, function(){
+            game.add.tween(testo).to({y: 0}, 1500, Phaser.Easing.Linear.None, true);
+            game.add.tween(testo).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
+        }, this);
+
 
         this.game.stage.backgroundColor = '#000';
         this.ground = this.add.sprite(0, 638, 'ground');
@@ -30,7 +59,17 @@ var GameState = {
         this.ground.body.immovable = true;
 
         //parse the file
-        this.levelData = JSON.parse(this.game.cache.getText('level'));
+        this.levelData = JSON.parse(this.game.cache.getText('level' + this.currentLevel));
+
+
+        //end of level
+
+        // this.endOfLevelWin = this.game.goal.events.add(function(){
+        //     console.log('level ended');
+        // }, this);
+
+        // if (win)
+
 
         this.platforms = this.add.group();
         this.platforms.enableBody = true;
@@ -79,6 +118,7 @@ var GameState = {
         this.barrelCreator = this.game.time.events.loop(Phaser.Timer.SECOND * this.levelData.barrelFrequency, this.createBarrel, this)
     },
     update: function() {
+
         this.game.physics.arcade.collide(this.player, this.ground);
         this.game.physics.arcade.collide(this.player, this.platforms);
 
@@ -187,7 +227,16 @@ var GameState = {
     },
     win: function(player, goal) {
         alert('you win!');
-        game.state.start('HomeState');
+
+        console.log('level ended');
+        console.log(GameState.currentLevel);
+        if (GameState.currentLevel < GameState.numLevels){
+            GameState.currentLevel++;
+        } else {
+            GameState.currentLevel = 1;
+        }
+        console.log(GameState.currentLevel);
+        game.state.start('GameState');
     },
     createBarrel: function() {
         //give me the first dead sprite
@@ -202,6 +251,33 @@ var GameState = {
 
         barrel.reset(this.levelData.goal.x, this.levelData.goal.y);
         barrel.body.velocity.x = this.levelData.barrelSpeed;
+    },
+
+    refreshStats: function(){
+        this.time.text = 'x';
+
+    },
+
+    render: function () {
+        // If our timer is running, show the time in a nicely formatted way, else show 'Done!'
+        if (timer.running) {
+            game.debug.text(this.formatTime(Math.round((timerEvent.delay - timer.ms) / 1000)), 2, 14, "#ff0");
+        }
+        else {
+            this.killPlayer();
+        }
+    },
+    endTimer: function() {
+        // Stop the timer when the delayed event triggers
+        timer.stop();
+    },
+    formatTime: function(s) {
+        // Convert seconds (s) to a nicely formatted and padded time string
+        var minutes = "0" + Math.floor(s / 60);
+        var seconds = "0" + (s - minutes * 60);
+        return minutes.substr(-2) + ":" + seconds.substr(-2);
     }
+
+
 
 };

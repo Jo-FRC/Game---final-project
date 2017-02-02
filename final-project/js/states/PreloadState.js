@@ -19,7 +19,10 @@ var PreloadState = {
         this.load.spritesheet('player', 'assets/images/player_spritesheet.png', 28, 30, 5, 1, 1);
         this.load.spritesheet('fire', 'assets/images/fire_spritesheet.png', 20, 21, 2, 1, 1);
 
-        this.load.text('level', 'assets/data/level.json');
+        this.load.text('level1', 'assets/data/level1.json');
+        this.load.text('level2', 'assets/data/level2.json');
+        this.load.text('level3', 'assets/data/level3.json');
+
     },
 
     create: function(){
