@@ -22,27 +22,31 @@ var GameState = {
     //executed after everything is loaded
     create: function() {
         var style = {font:'35px Arial', fill:'#fff'};
-        var style2 = {font:'18px Arial', fill:'#fff'};
+        // var style2 = {font:'18px Arial', fill:'#fff'};
         var myText = 'LEVEL ' + GameState.currentLevel;
+        // var tempo = '+5';
         var testo = this.game.add.text(110, this.game.world.centerY + 240,  myText, style);
 
-        // var time = this.game.add.text(0, 10,  'Time: ', style2);
-        var score = this.game.add.text(140, 10,  'Score: ', style2);
 
-        var time = this.game.add.text(80, 10,  '11', style2);
+        // var time = this.game.add.text(0, 10,  'Time: ', style2);
+        // var score = this.game.add.text(140, 10,  'Score: ', style2);
+        //
+        // var time = this.game.add.text(80, 10,  '11', style2);
 
 
         timer = game.time.create();
 
-       // Create a delayed event 1m and 30s from now
-       timerEvent = timer.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 30, this.endTimer, this);
+        // Create a delayed event 1m and 30s from now
+        timerEvent = timer.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 30, this.endTimer, this);
+        // console.log(timer.second);
 
-       // Start the timer
-       timer.start();
+        // Start the timer
+        timer.start();
+
 
         // secondi.fixedToCamera = true;
         timer.fixedToCamera = true;
-        score.fixedToCamera = true;
+        // score.fixedToCamera = true;
 
         this.refreshStats();
 
@@ -50,6 +54,14 @@ var GameState = {
             game.add.tween(testo).to({y: 0}, 1500, Phaser.Easing.Linear.None, true);
             game.add.tween(testo).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
         }, this);
+        //
+        // if (timer.paused = true){
+        //     game.time.events.add(2000, function(){
+        //         game.add.tween(testoTempo).to({y: 0}, 1500, Phaser.Easing.Linear.None, true);
+        //         game.add.tween(testoTempo).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
+        //     }, this);
+        //
+        // }
 
 
         this.game.stage.backgroundColor = '#000';
@@ -80,6 +92,28 @@ var GameState = {
 
         this.platforms.setAll('body.immovable', true);
         this.platforms.setAll('body.allowGravity', false);
+
+        //clocks
+
+        this.clock = this.add.group();
+        this.clock.enableBody = true;
+
+        this.levelData.clockData.forEach(function(element){
+            this.clock.create(element.x, element.y, 'clock');
+            // this.clock.scale.set(0.2);
+        }, this);
+
+        this.clock.setAll('body.immovable', true);
+        this.clock.setAll('body.allowGravity', false);
+
+
+
+
+        // this.clock.setAll('scale.setTo', 0.5);
+        // this.clock.scale.setTo(0.2);
+        // this.clock.anchor.set(0.5);
+
+
 
         //fires
         this.fires = this.add.group();
@@ -128,6 +162,7 @@ var GameState = {
         this.game.physics.arcade.overlap(this.player, this.fires, this.killPlayer);
         this.game.physics.arcade.overlap(this.player, this.barrels, this.killPlayer);
         this.game.physics.arcade.overlap(this.player, this.goal, this.win);
+        this.game.physics.arcade.overlap(this.player, this.clock, this.addTime);
 
         this.player.body.velocity.x = 0;
 
@@ -225,6 +260,32 @@ var GameState = {
         console.log('auch!');
         game.state.start('HomeState', true, false, 'GAME OVER');
     },
+    addTime: function(player, clock, timerEvent) {
+        console.log(timerEvent);
+        var stopTime = true;
+        console.log(timer.length);
+        timer.paused = true;
+
+
+
+        function unpause(){
+            this.game.time.events.add(5000, function() {  console.log("resumed");  timer.resume();}, this);
+
+        }
+
+        unpause();
+
+
+        
+        clock.destroy();
+        // var testoTempo = this.game.add.text(110, this.game.world.centerY,  '+5', style)
+        //
+        // game.time.events.add(2000, function(){
+        // game.add.tween(testoTempo).to({y: 0}, 1500, Phaser.Easing.Linear.None, true);
+        // game.add.tween(testoTempo).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
+        // }, this);
+    },
+
     win: function(player, goal) {
         alert('you win!');
 
@@ -236,10 +297,20 @@ var GameState = {
             GameState.currentLevel = 1;
         }
         console.log(GameState.currentLevel);
+
+        //to check how much time was need to finish the currentLevel
+        console.log(timer.ms/1000);
+        if (timer.ms/1000 < 10){
+            console.log('Amazing');
+        }
+        if (timer.ms/1000 > 10){
+            console.log('not bad');
+        }
+
         game.state.start('GameState');
     },
     createBarrel: function() {
-        //give me the first dead sprite
+    //give me the first dead sprite
         var barrel = this.barrels.getFirstExists(false);
 
         if(!barrel) {
@@ -262,7 +333,9 @@ var GameState = {
         // If our timer is running, show the time in a nicely formatted way, else show 'Done!'
         if (timer.running) {
             game.debug.text(this.formatTime(Math.round((timerEvent.delay - timer.ms) / 1000)), 2, 14, "#ff0");
+        // console.log(timer.duration);
         }
+
         else {
             this.killPlayer();
         }
@@ -276,8 +349,12 @@ var GameState = {
         var minutes = "0" + Math.floor(s / 60);
         var seconds = "0" + (s - minutes * 60);
         return minutes.substr(-2) + ":" + seconds.substr(-2);
+    },
+
+    checkIfPause: function(){
+        if(timer.paused){
+            this.game.add.text(110, this.game.world.centerY + 240,  '+5');
+        }
     }
-
-
 
 };

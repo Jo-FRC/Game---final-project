@@ -15,9 +15,20 @@ var PreloadState = {
         this.load.image('arrowButton', 'assets/images/arrowButton.png');
         this.load.image('actionButton', 'assets/images/actionButton.png');
         this.load.image('barrel', 'assets/images/barrel.png');
+        this.load.image('clock', 'assets/images/clock.png', 20, 21, 2, 1, 1);
+
 
         this.load.spritesheet('player', 'assets/images/player_spritesheet.png', 28, 30, 5, 1, 1);
         this.load.spritesheet('fire', 'assets/images/fire_spritesheet.png', 20, 21, 2, 1, 1);
+
+
+
+        this.load.spritesheet("levels", "assets/images/levels.png", this.game.global.thumbWidth, this.game.global.thumbHeight);
+        this.load.spritesheet("level_arrows", "assets/images/level_arrows.png", 48, 48);
+        this.load.spritesheet("game", "assets/images/game.png", 200, 80);
+
+
+
 
         this.load.text('level1', 'assets/data/level1.json');
         this.load.text('level2', 'assets/data/level2.json');
